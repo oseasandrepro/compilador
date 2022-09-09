@@ -7,16 +7,16 @@ num1 = 0
 num2 = 0
 
 
-num1 = input{int}
-num2 = input{int}
-num4 = input{float}
+input{int,num1}
+input{int,num2}
+input{float,num4}
 
 num3 = num1 + num2
 
 imprim "A soma é"
 imprim num3
 
-num1 = input{int}
+input{int,num1}
 
 se { num1 > 4 }
 	imprim "numero digitado é maior que 4"
