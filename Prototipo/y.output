@@ -1,0 +1,323 @@
+State 20 conflicts: 4 shift/reduce
+State 21 conflicts: 4 shift/reduce
+State 22 conflicts: 4 shift/reduce
+State 23 conflicts: 4 shift/reduce
+
+
+Grammar
+
+    0 $accept: PROGRAM $end
+
+    1 PROGRAM: ε
+    2        | PROGRAM INSTRUCTION
+
+    3 INSTRUCTION: ASSIGMENT '\n'
+    4            | EXIT_COMMAND '\n'
+    5            | OUT_PUT EXP '\n'
+
+    6 ASSIGMENT: VARNAME '=' EXP
+
+    7 EXP: VARNAME
+    8    | INTEGER
+    9    | EXP '+' EXP
+   10    | EXP '-' EXP
+   11    | EXP '*' EXP
+   12    | EXP '%' EXP
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    '\n' (10) 3 4 5
+    '%' (37) 12
+    '*' (42) 11
+    '+' (43) 9
+    '-' (45) 10
+    '=' (61) 6
+    error (256)
+    VARNAME <sptr> (258) 6 7
+    INTEGER <num> (259) 8
+    OUT_PUT (260) 5
+    EXIT_COMMAND (261) 4
+
+
+Nonterminals, with rules where they appear
+
+    $accept (13)
+        on left: 0
+    PROGRAM (14)
+        on left: 1 2
+        on right: 0 2
+    INSTRUCTION (15)
+        on left: 3 4 5
+        on right: 2
+    ASSIGMENT (16)
+        on left: 6
+        on right: 3
+    EXP <num> (17)
+        on left: 7 8 9 10 11 12
+        on right: 5 6 9 10 11 12
+
+
+State 0
+
+    0 $accept: • PROGRAM $end
+
+    $default  reduce using rule 1 (PROGRAM)
+
+    PROGRAM  go to state 1
+
+
+State 1
+
+    0 $accept: PROGRAM • $end
+    2 PROGRAM: PROGRAM • INSTRUCTION
+
+    $end          shift, and go to state 2
+    VARNAME       shift, and go to state 3
+    OUT_PUT       shift, and go to state 4
+    EXIT_COMMAND  shift, and go to state 5
+
+    INSTRUCTION  go to state 6
+    ASSIGMENT    go to state 7
+
+
+State 2
+
+    0 $accept: PROGRAM $end •
+
+    $default  accept
+
+
+State 3
+
+    6 ASSIGMENT: VARNAME • '=' EXP
+
+    '='  shift, and go to state 8
+
+
+State 4
+
+    5 INSTRUCTION: OUT_PUT • EXP '\n'
+
+    VARNAME  shift, and go to state 9
+    INTEGER  shift, and go to state 10
+
+    EXP  go to state 11
+
+
+State 5
+
+    4 INSTRUCTION: EXIT_COMMAND • '\n'
+
+    '\n'  shift, and go to state 12
+
+
+State 6
+
+    2 PROGRAM: PROGRAM INSTRUCTION •
+
+    $default  reduce using rule 2 (PROGRAM)
+
+
+State 7
+
+    3 INSTRUCTION: ASSIGMENT • '\n'
+
+    '\n'  shift, and go to state 13
+
+
+State 8
+
+    6 ASSIGMENT: VARNAME '=' • EXP
+
+    VARNAME  shift, and go to state 9
+    INTEGER  shift, and go to state 10
+
+    EXP  go to state 14
+
+
+State 9
+
+    7 EXP: VARNAME •
+
+    $default  reduce using rule 7 (EXP)
+
+
+State 10
+
+    8 EXP: INTEGER •
+
+    $default  reduce using rule 8 (EXP)
+
+
+State 11
+
+    5 INSTRUCTION: OUT_PUT EXP • '\n'
+    9 EXP: EXP • '+' EXP
+   10    | EXP • '-' EXP
+   11    | EXP • '*' EXP
+   12    | EXP • '%' EXP
+
+    '\n'  shift, and go to state 15
+    '+'   shift, and go to state 16
+    '-'   shift, and go to state 17
+    '*'   shift, and go to state 18
+    '%'   shift, and go to state 19
+
+
+State 12
+
+    4 INSTRUCTION: EXIT_COMMAND '\n' •
+
+    $default  reduce using rule 4 (INSTRUCTION)
+
+
+State 13
+
+    3 INSTRUCTION: ASSIGMENT '\n' •
+
+    $default  reduce using rule 3 (INSTRUCTION)
+
+
+State 14
+
+    6 ASSIGMENT: VARNAME '=' EXP •
+    9 EXP: EXP • '+' EXP
+   10    | EXP • '-' EXP
+   11    | EXP • '*' EXP
+   12    | EXP • '%' EXP
+
+    '+'  shift, and go to state 16
+    '-'  shift, and go to state 17
+    '*'  shift, and go to state 18
+    '%'  shift, and go to state 19
+
+    $default  reduce using rule 6 (ASSIGMENT)
+
+
+State 15
+
+    5 INSTRUCTION: OUT_PUT EXP '\n' •
+
+    $default  reduce using rule 5 (INSTRUCTION)
+
+
+State 16
+
+    9 EXP: EXP '+' • EXP
+
+    VARNAME  shift, and go to state 9
+    INTEGER  shift, and go to state 10
+
+    EXP  go to state 20
+
+
+State 17
+
+   10 EXP: EXP '-' • EXP
+
+    VARNAME  shift, and go to state 9
+    INTEGER  shift, and go to state 10
+
+    EXP  go to state 21
+
+
+State 18
+
+   11 EXP: EXP '*' • EXP
+
+    VARNAME  shift, and go to state 9
+    INTEGER  shift, and go to state 10
+
+    EXP  go to state 22
+
+
+State 19
+
+   12 EXP: EXP '%' • EXP
+
+    VARNAME  shift, and go to state 9
+    INTEGER  shift, and go to state 10
+
+    EXP  go to state 23
+
+
+State 20
+
+    9 EXP: EXP • '+' EXP
+    9    | EXP '+' EXP •
+   10    | EXP • '-' EXP
+   11    | EXP • '*' EXP
+   12    | EXP • '%' EXP
+
+    '+'  shift, and go to state 16
+    '-'  shift, and go to state 17
+    '*'  shift, and go to state 18
+    '%'  shift, and go to state 19
+
+    '+'       [reduce using rule 9 (EXP)]
+    '-'       [reduce using rule 9 (EXP)]
+    '*'       [reduce using rule 9 (EXP)]
+    '%'       [reduce using rule 9 (EXP)]
+    $default  reduce using rule 9 (EXP)
+
+
+State 21
+
+    9 EXP: EXP • '+' EXP
+   10    | EXP • '-' EXP
+   10    | EXP '-' EXP •
+   11    | EXP • '*' EXP
+   12    | EXP • '%' EXP
+
+    '+'  shift, and go to state 16
+    '-'  shift, and go to state 17
+    '*'  shift, and go to state 18
+    '%'  shift, and go to state 19
+
+    '+'       [reduce using rule 10 (EXP)]
+    '-'       [reduce using rule 10 (EXP)]
+    '*'       [reduce using rule 10 (EXP)]
+    '%'       [reduce using rule 10 (EXP)]
+    $default  reduce using rule 10 (EXP)
+
+
+State 22
+
+    9 EXP: EXP • '+' EXP
+   10    | EXP • '-' EXP
+   11    | EXP • '*' EXP
+   11    | EXP '*' EXP •
+   12    | EXP • '%' EXP
+
+    '+'  shift, and go to state 16
+    '-'  shift, and go to state 17
+    '*'  shift, and go to state 18
+    '%'  shift, and go to state 19
+
+    '+'       [reduce using rule 11 (EXP)]
+    '-'       [reduce using rule 11 (EXP)]
+    '*'       [reduce using rule 11 (EXP)]
+    '%'       [reduce using rule 11 (EXP)]
+    $default  reduce using rule 11 (EXP)
+
+
+State 23
+
+    9 EXP: EXP • '+' EXP
+   10    | EXP • '-' EXP
+   11    | EXP • '*' EXP
+   12    | EXP • '%' EXP
+   12    | EXP '%' EXP •
+
+    '+'  shift, and go to state 16
+    '-'  shift, and go to state 17
+    '*'  shift, and go to state 18
+    '%'  shift, and go to state 19
+
+    '+'       [reduce using rule 12 (EXP)]
+    '-'       [reduce using rule 12 (EXP)]
+    '*'       [reduce using rule 12 (EXP)]
+    '%'       [reduce using rule 12 (EXP)]
+    $default  reduce using rule 12 (EXP)
