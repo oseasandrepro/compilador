@@ -1,0 +1,32 @@
+Key Words:
+	tipos de dados:
+		float
+		int
+
+	repetição:
+		enq
+		fimenq
+	
+	condicionais:
+		se
+		senao
+		fimse
+	
+	entrada:
+		input
+
+	saida:
+		imprim
+
+	terminar programa:
+		rat
+
+operadores aritimeticos:
+	+ - % *
+	
+operadores relacionais:
+	> < >= <= eq
+
+operador de atribuição
+	=
+e } {
