@@ -1,98 +1,70 @@
 %{
 
 #include <stdio.h>
+#include "comp.h"
 
 %}
 
 
 %option noyywrap
 
-DIGIT [0-9]+
+DIGIT [0-9]
 LETTER [a-zA-Z]
-ID[a-zA-Z][a-zA-Z0-9]*
-WHITESPACE[  ]
-ABERTURA[ ( ]
-FECHAMENTO[ ) ]
-STRING_ABERTURA[ " ]
-STRING_FECHAMENTO[ " ]
-ID_SPACE[a-zA-Z ][a-zA-Z0-9 ]*
+ID[a-zA-Z_][a-zA-Z0-9_]*
+ABERTURA[(]
+FECHAMENTO[)]
+STRING_ABERTURA["]
+STRING_FECHAMENTO["]
 
 %%
 
 
+"senao"					{printf("[%s] -> CONDICIONAL\n", yytext);			return SENAO;}
+"fimse"					{printf("[%s] -> CONDICIONAL\n", yytext);			return FIMSE;}
+"enq"					{printf("[%s] -> REPETICAO\n",	yytext);			return ENQ;}
+"fimenq"				{printf("[%s] -> REPETICAO\n", yytext);				return FIMENQ;}
+"int"					{printf("[%s] -> TIPO DE DADOS\n", yytext); 		return INT;}
+"float"					{printf("[%s] -> TIPO DE DADOS\n", yytext); 		return FLOAT;}
+"imprim"				{printf("[%s] -> COMANDO DE SAIDA\n", yytext); 		return IMPRIM;}
+"input"					{printf("[%s] -> COMANDO DE ENTRADA\n", yytext); 	return INPUT_COMMAND;}
+"rat" 					{printf("[%s] -> FIM PROGRAMA\n", yytext);			return RAT;}
 
-senao  {printf("[%s] -> CONDICIONAL\n", yytext); }
-"senao"+{WHITESPACE} {printf("[%s] -> CONDICIONAL\n", yytext); }
-
-fimse  {printf("[%s] -> CONDICIONAL\n", yytext); }
-"fimse"+{WHITESPACE} {printf("[%s] -> CONDICIONAL\n", yytext); }
-
-
-enq {printf("[%s] -> REPETICAO\n", yytext); }
-"enq"+{WHITESPACE} {printf("[%s] -> REPETICAO\n", yytext); }
-
-fimenq  {printf("[%s] -> REPETICAO\n", yytext); }
-"fimnq"+{WHITESPACE} {printf("[%s] -> REPETICAO\n", yytext); }
-
-
-
-int {printf("[%s] -> TIPO DE DADOS\n", yytext); }
-"int"+{WHITESPACE} {printf("[%s] -> TIPO DE DADOS\n", yytext); }
+"+" 					{printf("[%s] -> OPERADOR SOMA\n", yytext);}
+"-" 					{printf("[%s] -> OPERADOR SUBTRACAO\n", yytext);}
+"%" 					{printf("[%s] -> OPERADOR DIVISAO\n", yytext);}
+"*"						{printf("[%s] -> OPERADOR DIVISAO\n", yytext);}
 
 
-
-float  {printf("[%s] -> TIPO DE DADOS\n", yytext); }
-"float"+{WHITESPACE} {printf("[%s] -> TIPO DE DADOS\n", yytext); }
-
-imprim {printf("[%s] -> FUNCAO DE SAIDA\n", yytext); }
-"imprim"+{WHITESPACE} {printf("[%s] -> FUNCAO DE SAIDA\n", yytext); }
-
-input {printf("[%s] -> FUNCAO DE ENTRADA\n", yytext); }
-"input"+{WHITESPACE} {printf("[%s] -> FUNCAO DE ENTRADA\n", yytext); }
-
-rat {printf("[%s] -> FIM PROGRAMA\n", yytext); }
-
-"+" {printf("[%s] -> OPERADOR SOMA\n", yytext);}
-"-" {printf("[%s] -> OPERADOR SUBTRACAO\n", yytext);}
-"%" {printf("[%s] -> OPERADOR DIVISAO\n", yytext);}
-"*" {printf("[%s] -> OPERADOR DIVISAO\n", yytext);}
+">"						{printf("[%s] -> OPERADOR MAIOR QUE\n", yytext);}
+"<" 					{printf("[%s] -> OPERADOR MENOR QUE\n", yytext);}
+">="					{printf("[%s] -> OPERADOR MAIOR OU IGUAL\n", yytext);}
+"<="					{printf("[%s] -> OPERADOR MENOR OU IGUAL\n", yytext);}
 
 
-">" {printf("[%s] -> OPERADOR MAIOR QUE\n", yytext);}
-"<" {printf("[%s] -> OPERADOR MENOR QUE\n", yytext);}
-">=" {printf("[%s] -> OPERADOR MAIOR OU IGUAL\n", yytext);}
-"<=" {printf("[%s] -> OPERADOR MENOR OU IGUAL\n", yytext);}
+"=" 					{printf("[%s] -> OPERADOR DE ATRIBUICAO\n", yytext);}
 
 
-"=" {printf("[%s] -> OPERADOR DE ATRIBUICAO\n", yytext);}
+"{" 					{printf("[%s] -> ABERTURA DE CHAVES\n", yytext);}
+"}" 					{printf("[%s] -> FECHAMENTO DE CHAVES\n", yytext);}
 
-e {printf("[%s] -> OPERADOR DE ATRIBUICAO\n", yytext);}
+[-]?[1-9]*{DIGIT}* 			{printf("[%s] -> UM VALOR INTEIRO\n", yytext); return INT_VALUE;}
+{DIGIT}*[.]{DIGIT}*		{printf("[%s] -> UM VALOR FLOAT\n", yytext); return FLOAT_VALUE;}
 
-"{" {printf("[%s] -> ABERTURA DE CHAVES\n", yytext);}
-"}" {printf("[%s] -> FECHAMENTO DE CHAVES\n", yytext);}
+{ID}					{printf("[%s] -> IDENTIFICADOR\n", yytext);}						;
 
-{DIGIT} {printf("[%s] -> DIGITO\n", yytext);}
-{DIGIT}+{WHITESPACE} {printf("[%s] -> DIGITO\n", yytext);}
-{WHITESPACE}+{DIGIT}+{WHITESPACE} {printf("[%s] -> DIGITO\n", yytext);}
+{STRING_ABERTURA}.*{STRING_FECHAMENTO}				{printf("[%s] -> STRING\n", yytext); return STRING_CONST;}
+{STRING_ABERTURA}.*					{printf("[%s] string mal formatada-> ERRO\n", yytext);}
 
-{ID_SPACE}+{DIGIT} {printf("[%s] -> IDENTIFICADOR\n", yytext);}
-{ID_SPACE}+{DIGIT}+{WHITESPACE} {printf("[%s] -> IDENTIFICADOR\n", yytext);}
-([:space:])*+{ID}+{DIGIT} {printf("[%s] -> IDENTIFICADOR\n", yytext);}
+[ \t]                	{;}
+[,\n]          	   		{return *yytext;}
 
-{LETTER} {printf("[%s] -> LETRA\n", yytext);}
-{LETTER}+{WHITESPACE} {printf("[%s] -> LETRA\n", yytext);}
-{WHITESPACE}+{LETTER}+{WHITESPACE} {printf("[%s] -> LETRA\n", yytext);}
-
-{STRING_ABERTURA}+{ID}+([[:space:]]+{ID})*{STRING_FECHAMENTO} {printf("[%s] -> STRING\n", yytext);}
-{STRING_ABERTURA}+{ID}+([[:space:]])* {printf("[%s] -> ERRO\n", yytext);}
-{STRING_ABERTURA}+{ID_SPACE}*{DIGIT}*{STRING_FECHAMENTO} {printf("[%s] -> STRING\n", yytext);}
-{STRING_ABERTURA}+{ID}+{DIGIT}+{STRING_FECHAMENTO} {printf("[%s] -> STRING\n", yytext);}
-
-
-[[:^space:]]+;
-
+.						{printf("Caracter desconhencido: %c\n", *yytext); return *yytext;}
 %%
-int main(){
-	yylex();
+
+int main()
+{
+	while( yylex() != RAT ){
+
+	}
 	return 0;
 }

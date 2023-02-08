@@ -3,9 +3,10 @@ int num2
 int num3
 float num4
 
+mum4 = 0.32
+num4 = 32.33
 num1 = 0
 num2 = 0
-
 
 input{int,num1}
 input{int,num2}
@@ -26,5 +27,4 @@ enq { num1 > 4 }
 	imprim num1
 	num1 = num1 - 1
 fimenq
-
 rat

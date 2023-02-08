@@ -1,0 +1,14 @@
+#define VAR_NAME 258
+#define INT_VALUE 259
+#define FLOAT_VALUE 260
+#define INT 261
+#define FLOAT 262
+#define IMPRIM 263
+#define INPUT_COMMAND 264
+#define STRING_CONST 265
+#define ENQ 266
+#define SE 267
+#define SENAO 268
+#define FIMSE 269
+#define FIMENQ 270
+#define RAT 271

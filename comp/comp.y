@@ -9,7 +9,7 @@ int reg_count = 0;
 %}
 
 %start PROGRAM
-%token DATA_TYPE VAR_NAME INTEGER FLOAT DATATYPE IMPRIM STRING_CONST ENQ SE SENAO FIMSE FIMENQ RAT
+%token VAR_NAME INT_VALUE FLOAT_VALUE INT FLOAT IMPRIM INPUT_COMMAND STRING_CONST ENQ SE SENAO FIMSE FIMENQ RAT
 
 %%
 
@@ -25,6 +25,8 @@ LINE    :   DECLARATION
         |   RAT
         ;
 
+DATA_TYPE   :   INT | FLOAT
+
 DECLARATION :   DATA_TYPE VAR_NAME
             |   DATA_TYPE VAR_NAME '=' EXP
             ;
@@ -32,7 +34,7 @@ DECLARATION :   DATA_TYPE VAR_NAME
 ASSIGNMENT  : VAR_NAME '=' EXP
             ;
 
-INPUT   :   '{'DATA_TYPE ',' VAR_NAME'}'
+INPUT   : INPUT_COMMAND '{'DATA_TYPE ',' VAR_NAME'}'
         ;
 
 OUTPUT  : IMPRIM   '"' STRING_CONST '"'
@@ -53,8 +55,8 @@ EXP :   VALUE
     ;
 
 VALUE   : VAR_NAME
-        | INTEGER
-        | FLOAT
+        | FLOAT_VALUE
+        | INT_VALUE
         ;
 %%
 
