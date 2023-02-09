@@ -32,13 +32,14 @@ STRING_FECHAMENTO["]
 "+" 					{printf("[%s] -> OPERADOR SOMA\n", yytext);}
 "-" 					{printf("[%s] -> OPERADOR SUBTRACAO\n", yytext);}
 "%" 					{printf("[%s] -> OPERADOR DIVISAO\n", yytext);}
-"*"						{printf("[%s] -> OPERADOR DIVISAO\n", yytext);}
+"*"						{printf("[%s] -> OPERADOR MULTIPLICACAO\n", yytext);}
 
 
 ">"						{printf("[%s] -> OPERADOR MAIOR QUE\n", yytext);}
 "<" 					{printf("[%s] -> OPERADOR MENOR QUE\n", yytext);}
 ">="					{printf("[%s] -> OPERADOR MAIOR OU IGUAL\n", yytext);}
 "<="					{printf("[%s] -> OPERADOR MENOR OU IGUAL\n", yytext);}
+"eq"                    {printf("[%s] -> OPERADOR IGUAL A\nn", yytext);}
 
 
 "=" 					{printf("[%s] -> OPERADOR DE ATRIBUICAO\n", yytext);}
