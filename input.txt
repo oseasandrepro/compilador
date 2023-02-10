@@ -1,0 +1,28 @@
+imprim  "Hello World"
+
+int a = 2
+int b = 5
+int c = 15
+
+imprim b - 3
+imprim b * 2
+se { a < 5 }
+    imprim a + b
+fimse
+se { b > 5 }
+    imprim a + b
+senao
+    b = b + 1
+fimse
+enq { a < 10 }
+    a = a + 2
+
+fimenq
+
+input{int, d}
+
+d = 10
+ 
+imprim d
+
+rat
