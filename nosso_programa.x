@@ -22,7 +22,13 @@ input{int,num1}
 
 se { num1 > 4 }
 	imprim  "numero digitado é maior que 4"
+	enq { num1 > 8 }
+		imprim num1
+		num1 = num1 - 1
+	fimenq
 fimse
+
+input{int,num1}
 
 enq { num1 > 4 }
 	imprim num1

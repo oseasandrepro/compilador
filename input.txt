@@ -1,19 +1,21 @@
-imprim  "Hello World"
+imprim  "Hello"
 
 int a = 2
 int b = 5
 int c = 15
+float d = 15.32
 
 imprim b - 3
-imprim b * 2
+imprim b * 8
 
 se { a < 5 }
-     a + b
+    imprim a + b
 fimse
+
 se { b > 5 }
-    a + b
+    imprim a + b
 senao
-    b + 1
+    imprim b + 1
 fimse
 
 input{int, d}
