@@ -24,16 +24,16 @@ STRING_FECHAMENTO["]
 
 %%
 
-"se"    		        {printf("[%s] -> CONDICIONAL\n", yytext);			return SE;}
-"senao"                 {printf("[%s] -> CONDICIONAL\n", yytext);			return SENAO;}
-"fimse"					{printf("[%s] -> CONDICIONAL\n", yytext);			return FIMSE;}
-"enq"					{printf("[%s] -> REPETICAO\n",	yytext);			return ENQ;}
-"fimenq"				{printf("[%s] -> REPETICAO\n", yytext);				return FIMENQ;}
-"int"					{printf("[%s] -> TIPO DE DADOS\n", yytext); 		return INT;}
-"float"					{printf("[%s] -> TIPO DE DADOS\n", yytext); 		return FLOAT;}
-"imprim"				{printf("[%s] -> COMANDO DE SAIDA\n", yytext); 		return OUTPUT_COMMAND;}
-"input"					{printf("[%s] -> COMANDO DE ENTRADA\n", yytext); 	return INPUT_COMMAND;}
-"rat" 					{printf("[%s] -> FIM PROGRAMA\n", yytext);			return RAT;}
+"se"    		        {yylval.sptr = create_var(yytext, yyleng); printf("[%s] -> CONDICIONAL\n", yytext);			return SE;}
+"senao"                 {yylval.sptr = create_var(yytext, yyleng); printf("[%s] -> CONDICIONAL\n", yytext);			return SENAO;}
+"fimse"					{yylval.sptr = create_var(yytext, yyleng); printf("[%s] -> CONDICIONAL\n", yytext);			return FIMSE;}
+"enq"					{yylval.sptr = create_var(yytext, yyleng); printf("[%s] -> REPETICAO\n",	yytext);			return ENQ;}
+"fimenq"				{yylval.sptr = create_var(yytext, yyleng); printf("[%s] -> REPETICAO\n", yytext);				return FIMENQ;}
+"int"					{yylval.sptr = create_var(yytext, yyleng); printf("[%s] -> TIPO DE DADOS\n", yytext); 		return INT;}
+"float"					{yylval.sptr = create_var(yytext, yyleng); printf("[%s] -> TIPO DE DADOS\n", yytext); 		return FLOAT;}
+"imprim"				{yylval.sptr = create_var(yytext, yyleng); printf("[%s] -> COMANDO DE SAIDA\n", yytext); 		return OUTPUT_COMMAND;}
+"input"					{yylval.sptr = create_var(yytext, yyleng); printf("[%s] -> COMANDO DE ENTRADA\n", yytext); 	return INPUT_COMMAND;}
+"rat" 					{yylval.sptr = create_var(yytext, yyleng); printf("[%s] -> FIM PROGRAMA\n", yytext);			return RAT;}
 
 "+" 					{printf("[%s] -> OPERADOR SOMA\n", yytext);			    return *yytext;}
 "-" 					{printf("[%s] -> OPERADOR SUBTRACAO\n", yytext);	    return *yytext;}

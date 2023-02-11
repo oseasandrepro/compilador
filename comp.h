@@ -5,6 +5,8 @@
 typedef struct {
   char name[MAX_NAME_LENGTH];
   int value;
+  char data_type[40];
+  char type[40];
 } variable;
 
 int yylex();

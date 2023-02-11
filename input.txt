@@ -6,18 +6,15 @@ int c = 15
 
 imprim b - 3
 imprim b * 2
+
 se { a < 5 }
-    imprim a + b
+     a + b
 fimse
 se { b > 5 }
-    imprim a + b
+    a + b
 senao
-    b = b + 1
+    b + 1
 fimse
-enq { a < 10 }
-    a = a + 2
-
-fimenq
 
 input{int, d}
 
