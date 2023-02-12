@@ -1,5 +1,4 @@
 %{
-
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -24,8 +23,16 @@ struct dataType {
 int count = 0;
 int q;
 char type[10];
+int ic_idx = 0;
+int temp_var = 0;
+int label = 0;
+int is_enq = 0;
+int is_else = 0;
+char buff[100];
+char icg[50][100];
 extern int countline;
 extern char *yytext;
+
 
 struct node { 
         struct node *left; 
@@ -49,12 +56,20 @@ struct node *last_line = NULL;
 		char name[100]; 
 		struct node* nd;
 	} nd_obj;
+
+        struct nss_token2 { 
+		char name[100]; 
+		struct node* nd;
+                char if_body[5];
+                char else_body[5];
+	} nd_obj2;
 } 
 
 %token <nd_obj> EQ NE GT LT EGT ELT VARNAME STRINGCONST INT FLOAT INPUT_COMMAND
 %token <nd_obj> OUTPUT_COMMAND ENQ FIMENQ SE SENAO FIMSE INT_VALUE FLOAT_VALUE RAT
 %token <nd_obj> TRUE FALSE
-%type  <nd_obj> output_command se relop arithmetic program line rat stm fimse fimenq declaration init assignment input datatype output conditional senao loop exp value condi
+%type  <nd_obj> output_command se relop arithmetic program line rat stm fimse fimenq declaration init assignment input datatype output senao loop exp value conditional
+%type  <nd_obj2> condi
 
 %right '='
 %left '+' '-'
@@ -63,9 +78,9 @@ struct node *last_line = NULL;
 
 %%
 
-program: line rat { $$.nd = mknode($1.nd, $2.nd, "program"); head = $$.nd; };
+program: line rat { $$.nd = mknode($1.nd, $2.nd, "program"); head = $$.nd;  };
 
-rat : RAT { add('K'); $$.nd = mknode(NULL, NULL, $1.name); }
+rat : RAT { add('K'); $$.nd = mknode(NULL, NULL, $1.name); sprintf(icg[ic_idx++], "return 0; }");}
 
 line    : { $$.nd =  NULL;}
         | stm line      { $$.nd = mknode($1.nd, $2.nd, "line"); }
@@ -83,57 +98,103 @@ datatype       : INT   { insert_type(); }
 
 declaration :   datatype VARNAME { add('V'); } init    {        $2.nd = mknode(NULL, NULL, $2.name); 
                                                                 $$.nd = mknode($2.nd, $4.nd, "declaration");
-
+                                                                sprintf(icg[ic_idx++], "%s %s = %s;\n", $1.name, $2.name, $4.name);
                                                         };
 init    :               { $$.nd = NULL; } 
-        | '=' exp       { $$.nd = $2.nd; }
+        | '=' exp       { $$.nd = $2.nd; sprintf($$.name, $2.name);}
         ;
 
-assignment  : VARNAME '=' exp   { $$.nd = mknode($1.nd, $3.nd, "="); }
+assignment  : VARNAME '=' exp   { $$.nd = mknode($1.nd, $3.nd, "="); sprintf(icg[ic_idx++], "%s = %s;\n", $1.name, $3.name);}
             ;
 
-input   : INPUT_COMMAND { add('K'); } '{' datatype ',' VARNAME '}'    {  $$.nd = mknode($4.nd, $6.nd, $1.name); }
+input   : INPUT_COMMAND { add('K'); } '{' datatype ',' VARNAME '}'    {  $$.nd = mknode($4.nd, $6.nd, $1.name);
+                                                                         if( strcmp(type, "int") )
+                                                                                sprintf(icg[ic_idx++],"scanf(\"%%d\",&%s);\n", $6.name);
+                                                                        else if( strcmp(type, "float") )
+                                                                                sprintf(icg[ic_idx++],"scanf(\"%%f\",&%s);\n", $6.name);
+                                                                      }
         ;
 
 
-output  : output_command        STRINGCONST { add('C'); }     { $2.nd = mknode(NULL, NULL,$2.name); $$.nd = mknode(NULL, $2.nd, $1.name);}    
-        | output_command        exp                           { $$.nd = mknode(NULL, $2.nd, $1.name);}                
+output  : output_command        STRINGCONST { add('C'); }     { $2.nd = mknode(NULL, NULL,$2.name); $$.nd = mknode(NULL, $2.nd, $1.name);
+                                                                sprintf(icg[ic_idx++],"printf(%s);\n", $2.name);
+                                                              }    
+        | output_command        exp                           { 
+                                                                $$.nd = mknode(NULL, $2.nd, $1.name);
+                                                                
+                                                              }                
         ; 
 output_command : OUTPUT_COMMAND { add('K'); }
 
-conditional  :   se '{' condi '}' line fimse               { struct node *sse = mknode($3.nd, $5.nd, $1.name); $$.nd = mknode(sse, $6.nd, "se-senao"); }
-             |   se '{' condi '}' line senao line fimse    { 
-                                                                                struct node *sse = mknode($3.nd, $5.nd, $1.name);
-                                                                                $6.nd->left = $7.nd;
-                                                                                $6.nd->right = $7.nd;
-                                                                                $$.nd = mknode(sse, $8.nd, "se-senao"); 
-                                                                        };
-            ;
-fimse : FIMSE   { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name);}
-senao : SENAO   { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name); }
-se    : SE      { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name); }    
+conditional  :   se '{' condi '}' line fimse            { 
+                                                                struct node *sse = mknode($3.nd, $5.nd, $1.name);
+                                                                $$.nd = mknode(sse, $6.nd, "se-senao"); 
+                                                                
+                                                                sprintf(icg[ic_idx++], "GOTO L%d;\n", label-1);
+                                                                sprintf(icg[ic_idx++], "%s:\n", $3.else_body);
+                                                        }
+             |   se '{' condi '}' line senao  line fimse {
+                                                                struct node *sse = mknode($3.nd, $5.nd, $1.name);
+                                                                $6.nd->left = $8.nd;
+                                                                $6.nd->right = $7.nd;
+                                                                $$.nd = mknode(sse, $6.nd, "se-senao");
 
-loop: ENQ { add('K'); }  '{' condi '}' line fimenq                      { 
+                                                                sprintf(icg[ic_idx++], "GOTO L%d;\n", label);
+                                                                sprintf(icg[ic_idx++], "L%d:\n",label);
+
+                                                        };
+
+
+fimse : FIMSE   { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name);}
+
+senao : SENAO   { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name);  sprintf(icg[ic_idx++], "GOTO L%d;\n", label);
+                                                                      sprintf(icg[ic_idx++], "L%d:\n",label-1);}
+
+se    : SE      { add('K'); {is_enq = 0;} } { $$.nd = mknode(NULL, NULL, $1.name); } 
+
+loop: ENQ { add('K'); is_enq = 1;}  '{' condi '}' line fimenq           { 
                                                                                 struct node *eqq = mknode($4.nd, $6.nd, $1.name);
                                                                                 $$.nd = mknode(eqq, $7.nd, "loop"); 
                                                                         } 
-fimenq : FIMENQ { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name); }
+
+fimenq : FIMENQ { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name); sprintf(icg[ic_idx++], "GOTO L%d;\n", label-1);
+                                                                      sprintf(icg[ic_idx++], "L%d:\n",label);}
 
 
 exp     : value                 { $$.nd = $1.nd; }
-        | exp arithmetic exp    { $$.nd = mknode($1.nd, $3.nd, $2.name); }
+        | exp arithmetic exp    { 
+                                        $$.nd = mknode($1.nd, $3.nd, $2.name);
+                                 }
         ;
 
 arithmetic : '+' | '-' | '*' | '%' ;
 
-condi   : value relop value     { $$.nd = mknode($1.nd, $3.nd, $2.name); }
+condi   : value relop value     {
+                                        if(is_enq) 
+                                        {  
+                                                sprintf($$.if_body, "L%d", ++label);  
+                                                sprintf(icg[ic_idx++], "\n%s:\n", $$.if_body);
+                                                sprintf(icg[ic_idx++], "\nif ( !(%s %s %s) ) GOTO L%d\n", $1.name, $2.name, $3.name, label+1);  
+                                                sprintf($$.else_body, "L%d", label++); 
+                                        } 
+                                        else {
+                                                if( strcmp("eq",$2.name) == 0)
+                                                          sprintf(icg[ic_idx++], "\nif (%s %s %s) GOTO L%d else GOTO L%d\n", $1.name, "==", $3.name, label, label+1);
+                                                else
+                                                        sprintf(icg[ic_idx++], "\nif (%s %s %s) GOTO L%d else GOTO L%d\n", $1.name, $2.name, $3.name, label, label+1);
+                                                sprintf($$.if_body, "L%d", label++);  
+                                                sprintf($$.else_body, "L%d", label++);
+                                                sprintf(icg[ic_idx++], "L%d:\n", label-2);
+                                        }
+                                        
+                                }
         | TRUE                  { add('K'); $$.nd = NULL; }
         | FALSE                 { add('K'); $$.nd = NULL; }
         ;
 
 relop: LT | GT | EGT | ELT | EQ | NE ;
 
-value   : VARNAME       { $$.nd = mknode(NULL, NULL, $1.name); }
+value   : VARNAME       { $$.nd = mknode(NULL, NULL, $1.name); sprintf($$.name, $1.name);}
         | FLOAT_VALUE   { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
         | INT_VALUE     { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
         ;
@@ -145,6 +206,7 @@ void yyerror(const char *s) {
 }
 
 int main() {
+        sprintf(icg[ic_idx++], "main(void){\n");
         yyparse();
         printf("\n\n");
 	printf("\tPHASE 1: LEXICAL ANALYSIS \n\n");
@@ -164,8 +226,17 @@ int main() {
 	printf("\t\t PHASE 2: SYNTAX ANALYSIS \n\n");
 	printtree(head); 
 	printf("\n\n");
+
+        printf("\t\t\t\t\t\t\t   PHASE 3: INTERMEDIATE CODE GENERATION \n\n");
+	for(int i=0; i<ic_idx; i++){
+		printf("%s", icg[i]);
+	}
+	printf("\n\n");
         
 }
+
+
+
 
 void insert_type() {
     strcpy(type, yytext);
@@ -246,27 +317,3 @@ if (root == NULL)
 
     printInorder(root->left, space);
 }
-
-/*
-void print2DUtil(struct node* root, int space)
-{
-   if (root == NULL)
-     return;
-
-    space += COUNT;
-
-    print2DUtil(root->right, space);
-
-    printf("\n");
-    for (int i = COUNT; i < space; i++)
-        printf(" ");
-
-    printf("%s\n", root->token);
-
-    print2DUtil(root->left, space);
-}
-
-void print2D(struct node* root){
-    print2DUtil(root, 0);
-}
-*/
