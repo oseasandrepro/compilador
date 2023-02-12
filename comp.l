@@ -1,5 +1,6 @@
 %{
 	#include "y.tab.h"
+	#include <string.h>
 	int countline = 0;
 
 %}
@@ -11,40 +12,42 @@ DIGIT [0-9]
 
 %%
 
-"se"    		        {return SE;}
-"senao"                 {return SENAO;}
-"fimse"					{return FIMSE;}
-"enq"					{return ENQ;}
-"fimenq"				{return FIMENQ;}
-"int"					{return INT;}
-"float"					{return FLOAT;}
-"imprim"				{return OUTPUT_COMMAND;}
-"input"					{return INPUT_COMMAND;}
-"rat" 					{return RAT;}
+"se"    		        {strcpy(yylval.nd_obj.name,(yytext)); return SE;}
+"senao"                 {strcpy(yylval.nd_obj.name,(yytext)); return SENAO;}
+"fimse"					{strcpy(yylval.nd_obj.name,(yytext)); return FIMSE;}
+"enq"					{strcpy(yylval.nd_obj.name,(yytext)); return ENQ;}
+"fimenq"				{strcpy(yylval.nd_obj.name,(yytext)); return FIMENQ;}
+"int"					{strcpy(yylval.nd_obj.name,(yytext)); return INT;}
+"float"					{strcpy(yylval.nd_obj.name,(yytext)); return FLOAT;}
+"imprim"				{strcpy(yylval.nd_obj.name,(yytext)); return OUTPUT_COMMAND;}
+"input"					{strcpy(yylval.nd_obj.name,(yytext)); return INPUT_COMMAND;}
+"rat" 					{strcpy(yylval.nd_obj.name,(yytext)); return RAT;}
+"true"					{strcpy(yylval.nd_obj.name,(yytext)); return TRUE;}
+"false"					{strcpy(yylval.nd_obj.name,(yytext)); return FALSE;}
 
-"+" 					{return *yytext;}
-"-" 					{return *yytext;}
-"%" 					{return *yytext;}
-"*"						{return *yytext;}
-"="                     {return *yytext;}
-","						{return *yytext;}
-"{" 					{return *yytext;}
-"}" 					{return *yytext;}
+"+" 					{strcpy(yylval.nd_obj.name,(yytext)); return *yytext;}
+"-" 					{strcpy(yylval.nd_obj.name,(yytext)); return *yytext;}
+"%" 					{strcpy(yylval.nd_obj.name,(yytext)); return *yytext;}
+"*"						{strcpy(yylval.nd_obj.name,(yytext)); return *yytext;}
+"="                     {strcpy(yylval.nd_obj.name,(yytext)); return *yytext;}
+","						{strcpy(yylval.nd_obj.name,(yytext)); return *yytext;}
+"{" 					{strcpy(yylval.nd_obj.name,(yytext)); return *yytext;}
+"}" 					{strcpy(yylval.nd_obj.name,(yytext)); return *yytext;}
 
-">"						{return GT;}
-"<" 					{return LT;}
-">="					{return EGT;}
-"<="					{return ELT;}
-"eq"                    {return EQ;}
-"!="					{return NE;}
+">"						{strcpy(yylval.nd_obj.name,(yytext)); return GT;}
+"<" 					{strcpy(yylval.nd_obj.name,(yytext)); return LT;}
+">="					{strcpy(yylval.nd_obj.name,(yytext)); return EGT;}
+"<="					{strcpy(yylval.nd_obj.name,(yytext)); return ELT;}
+"eq"                    {strcpy(yylval.nd_obj.name,(yytext)); return EQ;}
+"!="					{strcpy(yylval.nd_obj.name,(yytext)); return NE;}
 
-[-]?[1-9]*{DIGIT}* 		{return INT_VALUE;}
-{DIGIT}*[.]{DIGIT}*		{return FLOAT_VALUE;}
+[-]?[1-9]*{DIGIT}* 		{strcpy(yylval.nd_obj.name,(yytext)); return INT_VALUE;}
+{DIGIT}*[.]{DIGIT}*		{strcpy(yylval.nd_obj.name,(yytext)); return FLOAT_VALUE;}
 
-{ID}					{return VARNAME;}
+{ID}					{strcpy(yylval.nd_obj.name,(yytext)); return VARNAME;}
 
-["].*[""]				{return STRINGCONST;}
-[ \t]+                {;}
+["].*["]				{strcpy(yylval.nd_obj.name,(yytext)); return STRINGCONST;}
+[ \t]+                  {;}
 [\n]					{countline++;}
 .					    {printf("Caracter desconhencido: %c\n", *yytext); return *yytext;}
 %%
