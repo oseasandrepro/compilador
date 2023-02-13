@@ -1,43 +1,9 @@
-imprim  "Hello"
-
-int a = 2
-int b = 5
-int c = 15
+int i = 4
 int num1
-float d = 15.32
-
-imprim b - 3
-imprim b * 8
-
-se { a < 5 }
-    int d = 7
-    imprim "hello1"
-    imprim a + b
-fimse
-
-se { b > 5 }
-    int c = 23
-    imprim "dentro do se 1"
-    imprim a + b
-senao
-    int i = 255
-    imprim "dentro do senao 1"
-    imprim b + 1
-fimse
-
-input{int, num1}
-
-enq { a > 4 }
-    imprim "enq1"
+int num2
+int num3
+enq { i > 0}
+    imprim  "Hello World\n"
+    i = i - 1
 fimenq
-
-enq { num1 > 4 }
-	imprim num1
-	num1 = num1 - 1
-fimenq
-
-se { 1 eq 1 }
-    imprim "ola oseas"
-fimse
-
 rat

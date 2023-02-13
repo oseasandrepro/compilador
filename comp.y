@@ -108,19 +108,19 @@ datatype       : INT   { insert_type(); }
 
 declaration :   datatype VARNAME { add('V'); } init    {        $2.nd = mknode(NULL, NULL, $2.name); 
                                                                 $$.nd = mknode($2.nd, $4.nd, "declaration");
-                                                                sprintf(icg[ic_idx++], "%s %s = %s;\n", $1.name, $2.name, $4.name);
+                                                                sprintf(icg[ic_idx++], "%s %s %s;\n", $1.name, $2.name, $4.name);
                                                         };
-init    :               { $$.nd = NULL; } 
-        | '=' exp       { $$.nd = $2.nd; sprintf($$.name, "%s", $2.name);}
+init    :               { $$.nd = NULL; sprintf($$.name, " "); } 
+        | '=' exp       { $$.nd = $2.nd; sprintf($$.name, "=%s", $2.name);}
         ;
 
 assignment  : VARNAME '=' exp   { $$.nd = mknode($1.nd, $3.nd, "="); sprintf(icg[ic_idx++], "%s = %s;\n", $1.name, $3.name);}
             ;
 
 input   : INPUT_COMMAND { add('K'); } '{' datatype ',' VARNAME '}'    {  $$.nd = mknode($4.nd, $6.nd, $1.name);
-                                                                         if( strcmp(type, "int") )
+                                                                         if( strcmp(type, "int") == 0 )
                                                                                 sprintf(icg[ic_idx++],"scanf(\"%%d\",&%s);\n", $6.name);
-                                                                        else if( strcmp(type, "float") )
+                                                                        else if( strcmp(type, "float") == 0 )
                                                                                 sprintf(icg[ic_idx++],"scanf(\"%%f\",&%s);\n", $6.name);
                                                                       }
         ;
@@ -143,7 +143,7 @@ conditional  :   se '{' condi '}' line fimse            {
                                                                 struct node *sse = mknode($3.nd, $5.nd, $1.name);
                                                                 $$.nd = mknode(sse, $6.nd, "se-senao"); 
                                                                 
-                                                                sprintf(icg[ic_idx++], "GOTO L%d;\n", label-1);
+                                                                sprintf(icg[ic_idx++], "goto L%d;\n", label-1);
                                                                 sprintf(icg[ic_idx++], "%s:\n", $3.else_body);
                                                         }
              |   se '{' condi '}' line senao  line fimse {
@@ -152,7 +152,7 @@ conditional  :   se '{' condi '}' line fimse            {
                                                                 $6.nd->right = $7.nd;
                                                                 $$.nd = mknode(sse, $6.nd, "se-senao");
 
-                                                                sprintf(icg[ic_idx++], "GOTO L%d;\n", label);
+                                                                sprintf(icg[ic_idx++], "goto L%d;\n", label);
                                                                 sprintf(icg[ic_idx++], "L%d:\n",label);
 
                                                         };
@@ -160,7 +160,7 @@ conditional  :   se '{' condi '}' line fimse            {
 
 fimse : FIMSE   { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name);}
 
-senao : SENAO   { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name);  sprintf(icg[ic_idx++], "GOTO L%d;\n", label);
+senao : SENAO   { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name);  sprintf(icg[ic_idx++], "goto L%d;\n", label);
                                                                       sprintf(icg[ic_idx++], "L%d:\n",label-1);}
 
 se    : SE      { add('K'); {is_enq = 0;} } { $$.nd = mknode(NULL, NULL, $1.name); } 
@@ -170,7 +170,7 @@ loop: ENQ { add('K'); is_enq = 1;}  '{' condi '}' line fimenq           {
                                                                                 $$.nd = mknode(eqq, $7.nd, "loop"); 
                                                                         } 
 
-fimenq : FIMENQ { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name); sprintf(icg[ic_idx++], "GOTO L%d;\n", label-1);
+fimenq : FIMENQ { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name); sprintf(icg[ic_idx++], "goto L%d;\n", label-1);
                                                                       sprintf(icg[ic_idx++], "L%d:\n",label);}
 
 
@@ -193,14 +193,14 @@ condi   : value relop value     {
                                         {  
                                                 sprintf($$.if_body, "L%d", ++label);  
                                                 sprintf(icg[ic_idx++], "\n%s:\n", $$.if_body);
-                                                sprintf(icg[ic_idx++], "\nif ( !(%s %s %s) ) GOTO L%d\n", $1.name, $2.name, $3.name, label+1);  
-                                                sprintf($$.else_body, "L%d", label++); 
+                                                sprintf(icg[ic_idx++], "\nif ( !(%s %s %s) )\n\tgoto L%d;\n", $1.name, $2.name, $3.name, label+1);  
+                                                sprintf($$.else_body, "L%d:", label++); 
                                         } 
                                         else {
                                                 if( strcmp("eq",$2.name) == 0)
-                                                          sprintf(icg[ic_idx++], "\nif (%s %s %s) GOTO L%d else GOTO L%d\n", $1.name, "==", $3.name, label, label+1);
+                                                          sprintf(icg[ic_idx++], "\nif (%s %s %s) goto L%d; else goto L%d;\n", $1.name, "==", $3.name, label, label+1);
                                                 else
-                                                        sprintf(icg[ic_idx++], "\nif (%s %s %s) GOTO L%d else GOTO L%d\n", $1.name, $2.name, $3.name, label, label+1);
+                                                        sprintf(icg[ic_idx++], "\nif (%s %s %s) goto L%d; else goto L%d;\n", $1.name, $2.name, $3.name, label, label+1);
                                                 sprintf($$.if_body, "L%d", label++);  
                                                 sprintf($$.else_body, "L%d", label++);
                                                 sprintf(icg[ic_idx++], "L%d:\n", label-2);
