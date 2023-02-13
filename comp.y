@@ -13,6 +13,8 @@ void insert_type();
 int search(char *);
 void insert_type();
 
+char *get_type(char *var);
+
 struct dataType {
         char * id_name;
         char * data_type;
@@ -20,11 +22,11 @@ struct dataType {
         int line_no;
 } symbol_table[MAX_SYMBOLS];
 
+int temp_var=0;
 int count = 0;
 int q;
 char type[10];
 int ic_idx = 0;
-int temp_var = 0;
 int label = 0;
 int is_enq = 0;
 int is_else = 0;
@@ -57,19 +59,27 @@ struct node *last_line = NULL;
 		struct node* nd;
 	} nd_obj;
 
-        struct nss_token2 { 
+        struct nss_obj2 { 
 		char name[100]; 
 		struct node* nd;
                 char if_body[5];
                 char else_body[5];
 	} nd_obj2;
+
+        struct nss_obj3 { 
+		char name[100]; 
+		struct node* nd;
+		char type[6];
+	} nd_obj3;
+        
 } 
 
 %token <nd_obj> EQ NE GT LT EGT ELT VARNAME STRINGCONST INT FLOAT INPUT_COMMAND
 %token <nd_obj> OUTPUT_COMMAND ENQ FIMENQ SE SENAO FIMSE INT_VALUE FLOAT_VALUE RAT
 %token <nd_obj> TRUE FALSE
-%type  <nd_obj> output_command se relop arithmetic program line rat stm fimse fimenq declaration init assignment input datatype output senao loop exp value conditional
+%type  <nd_obj> output_command se relop arithmetic program line rat stm fimse fimenq declaration assignment input datatype output senao loop conditional
 %type  <nd_obj2> condi
+%type  <nd_obj3>  exp value init
 
 %right '='
 %left '+' '-'
@@ -101,7 +111,7 @@ declaration :   datatype VARNAME { add('V'); } init    {        $2.nd = mknode(N
                                                                 sprintf(icg[ic_idx++], "%s %s = %s;\n", $1.name, $2.name, $4.name);
                                                         };
 init    :               { $$.nd = NULL; } 
-        | '=' exp       { $$.nd = $2.nd; sprintf($$.name, $2.name);}
+        | '=' exp       { $$.nd = $2.nd; sprintf($$.name, "%s", $2.name);}
         ;
 
 assignment  : VARNAME '=' exp   { $$.nd = mknode($1.nd, $3.nd, "="); sprintf(icg[ic_idx++], "%s = %s;\n", $1.name, $3.name);}
@@ -121,7 +131,10 @@ output  : output_command        STRINGCONST { add('C'); }     { $2.nd = mknode(N
                                                               }    
         | output_command        exp                           { 
                                                                 $$.nd = mknode(NULL, $2.nd, $1.name);
-                                                                
+                                                                if( strcmp($2.type, "int" ) == 0 )
+                                                                         sprintf(icg[ic_idx++],"printf(\"%%d\", %s);\n", $2.name);
+                                                                else if( strcmp($2.type, "float" ) == 0 )
+                                                                        sprintf(icg[ic_idx++],"printf(\"%%f\", %s);\n", $2.name);
                                                               }                
         ; 
 output_command : OUTPUT_COMMAND { add('K'); }
@@ -161,10 +174,16 @@ fimenq : FIMENQ { add('K'); } { $$.nd = mknode(NULL, NULL, $1.name); sprintf(icg
                                                                       sprintf(icg[ic_idx++], "L%d:\n",label);}
 
 
-exp     : value                 { $$.nd = $1.nd; }
+exp     : value                 { $$.nd = $1.nd; sprintf($$.type , "%s", $1.type); }
         | exp arithmetic exp    { 
-                                        $$.nd = mknode($1.nd, $3.nd, $2.name);
-                                 }
+                                        if(!strcmp($1.type, $3.type)) {
+		                                sprintf($$.type,"%s", $1.type);
+		                                $$.nd = mknode($1.nd, $3.nd, $2.name); 
+	                                }
+                                        sprintf($$.name, "t%d", temp_var);
+	                                temp_var++;
+	                                sprintf(icg[ic_idx++], "%s %s = %s %s %s;\n",$$.type,  $$.name, $1.name, $2.name, $3.name);
+                                }
         ;
 
 arithmetic : '+' | '-' | '*' | '%' ;
@@ -194,9 +213,9 @@ condi   : value relop value     {
 
 relop: LT | GT | EGT | ELT | EQ | NE ;
 
-value   : VARNAME       { $$.nd = mknode(NULL, NULL, $1.name); sprintf($$.name, $1.name);}
-        | FLOAT_VALUE   { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
-        | INT_VALUE     { add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
+value   : VARNAME       { $$.nd = mknode(NULL, NULL, $1.name); sprintf($$.name, $1.name); char *id_type = get_type($1.name); sprintf($$.type,"%s",id_type); }
+        | FLOAT_VALUE   { strcpy($$.name, $1.name); sprintf($$.type, "float"); add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
+        | INT_VALUE     { strcpy($$.name, $1.name); sprintf($$.type, "int"); add('C'); $$.nd = mknode(NULL, NULL, $1.name); }
         ;
 %%
 
@@ -206,7 +225,9 @@ void yyerror(const char *s) {
 }
 
 int main() {
-        sprintf(icg[ic_idx++], "main(void){\n");
+        sprintf(icg[ic_idx++], "#include <stdio.h>\n");
+        sprintf(icg[ic_idx++], "#include <stdlib.h>\n");
+        sprintf(icg[ic_idx++], "int main(void){\n");
         yyparse();
         printf("\n\n");
 	printf("\tPHASE 1: LEXICAL ANALYSIS \n\n");
@@ -316,4 +337,14 @@ if (root == NULL)
     printf("%s\n", root->token);
 
     printInorder(root->left, space);
+}
+
+char *get_type(char *var){
+	for(int i=0; i<count; i++) {
+		if(!strcmp(symbol_table[i].id_name, var)) {
+			return symbol_table[i].data_type;
+		}
+	}
+
+        return NULL;
 }

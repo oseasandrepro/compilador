@@ -1,6 +1,4 @@
 int a = 3
-imprim "Hello World"
-se { a < 5 }
-    imprim "a é menor que 3"
-fimse
+int b = 4
+imprim  a + b
 rat
